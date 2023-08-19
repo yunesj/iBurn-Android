@@ -14,8 +14,10 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.Flowables
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
+import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.atomic.AtomicBoolean
+
 
 /**
  * Class for interaction with our database via Reactive streams.
@@ -369,12 +371,35 @@ class DataProvider private constructor(private val context: Context, private val
     fun observeUserAddedMapItemsOnly(): Flowable<List<PlayaItem>> {
         // TODO : Honor upgradeLock
         val nowDate = CurrentDateProvider.getCurrentDate()
-        val now = DateUtil.getIso8601Format().format(nowDate)
+
+        val dayNightCutoff = Calendar.getInstance()
+        dayNightCutoff.setTime(nowDate)
+        dayNightCutoff.set(Calendar.HOUR_OF_DAY, 20)
+        dayNightCutoff.set(Calendar.MINUTE, 0)
+        dayNightCutoff.set(Calendar.SECOND, 0)
+        dayNightCutoff.set(Calendar.MILLISECOND, 0)
+
+        var startingFrom = Calendar.getInstance()
+        startingFrom.setTime(dayNightCutoff.getTime())
+        var startingUntil = Calendar.getInstance()
+        startingUntil.setTime(dayNightCutoff.getTime())
+        if (nowDate < dayNightCutoff.getTime()) {
+            startingFrom.set(Calendar.HOUR_OF_DAY, 8)
+        }
+        else {
+            startingUntil.add(Calendar.DATE, 1)
+            startingUntil.set(Calendar.HOUR_OF_DAY, 8)
+        }
+
+        val now = Utils.convertDateToString(nowDate)
+        val startingFromString = Utils.convertDateToString(startingFrom.getTime())
+        val startingUntilString = Utils.convertDateToString(startingUntil.getTime())
+
 
         return Flowables.combineLatest(
                 db.artDao().favorites,
                 db.campDao().favorites,
-                db.eventDao().getNonExpiredFavorites(now),
+                db.eventDao().getNonExpiredFavoritesStartingBetween(now, startingFromString, startingUntilString),
                 db.userPoiDao().all)
         { arts, camps, events, userpois ->
             val all = ArrayList<PlayaItem>(arts.size + camps.size + events.size + userpois.size)

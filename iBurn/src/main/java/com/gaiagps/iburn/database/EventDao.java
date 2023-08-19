@@ -34,11 +34,12 @@ public interface EventDao {
     Flowable<List<Event>> getAll();
     @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + PLAYA_ID + " = :id")
     Single<Event> getByPlayaId(String id);
-    @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + FAVORITE + " = 1 ORDER BY " + START_TIME)
+
+    @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + FAVORITE + " = 1 ORDER BY " + END_TIME + ", " + START_TIME)
     Flowable<List<Event>> getFavorites();
 
-    @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + FAVORITE + " = 1 AND " + END_TIME + " >= :now ORDER BY " + START_TIME)
-    Flowable<List<Event>> getNonExpiredFavorites(String now);
+    @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + FAVORITE + " = 1 AND " + END_TIME + " >= :now AND " + START_TIME + " >= :startingFrom AND " + START_TIME + " <= :startingUntil ORDER BY " + END_TIME + ", " + START_TIME)
+    Flowable<List<Event>> getNonExpiredFavoritesStartingBetween(String now, String startingFrom, String startingUntil);
 
     @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + NAME + " LIKE :name GROUP BY " + NAME)
     Flowable<List<Event>> findByName(String name);
@@ -56,7 +57,7 @@ public interface EventDao {
             START_TIME_PRETTY + " LIKE :day AND "+
             "not(s_time <= :allDayStart AND e_time >= :allDayEnd)"+
             "ORDER BY "
-            + ALL_DAY + ", " + START_TIME + " ASC")
+            + ALL_DAY + ", " + END_TIME + ", " + START_TIME)
     Flowable<List<Event>> findByDayTimed(String day,String allDayStart,
                                          String allDayEnd);
 
@@ -64,7 +65,7 @@ public interface EventDao {
             " LIKE :day AND " + END_TIME + ">= :now AND " +
             "not(s_time <= :allDayStart AND e_time >= :allDayEnd)"+
             " ) ORDER BY "
-            + ALL_DAY + ", " + START_TIME + " ASC")
+            + ALL_DAY + ", " + END_TIME + ", " + START_TIME)
     Flowable<List<Event>> findByDayNoExpiredTimed(String day,String now,
                                                   String allDayStart,
                                                   String allDayEnd);
@@ -72,7 +73,7 @@ public interface EventDao {
     @Query("SELECT * FROM " + TABLE_NAME + " WHERE (" + START_TIME_PRETTY +
             " LIKE :day AND "+
             "s_time<= :allDayStart AND e_time >= :allDayEnd"+
-            " ) ORDER BY " + ALL_DAY + ", " + START_TIME + " ASC")
+            " ) ORDER BY " + ALL_DAY + ", " + END_TIME + ", " + START_TIME)
     Flowable<List<Event>> findByDayAllDay(String day,
                                                     String allDayStart,
                                                     String allDayEnd);
@@ -81,7 +82,7 @@ public interface EventDao {
               + START_TIME_PRETTY + " LIKE :day AND " +
               "not(s_time <= :allDayStart AND e_time >= :allDayEnd) AND "+
               TYPE + " IN (:types)) ORDER BY " + ALL_DAY +
-              ", " + START_TIME + " ASC")
+              ", " + END_TIME + ", " + START_TIME)
     Flowable<List<Event>> findByDayAndTypeTimed(String day, List<String> types,
                                                 String allDayStart,
                                                 String allDayEnd);
@@ -91,7 +92,7 @@ public interface EventDao {
             " LIKE :day AND " +
             END_TIME + ">= :now AND "+
             "not(s_time <= :allDayStart AND e_time >= :allDayEnd) AND "+
-             TYPE + " IN (:types)) ORDER BY " + ALL_DAY + ", " + START_TIME + " ASC")
+             TYPE + " IN (:types)) ORDER BY " + ALL_DAY + ", " + END_TIME + ", " + START_TIME)
     Flowable<List<Event>> findByDayAndTypeNoExpiredTimed
             (String day, List<String> types, String now,
              String allDayStart, String allDayEnd);
@@ -101,13 +102,13 @@ public interface EventDao {
             " LIKE :day AND "
             + TYPE + " IN (:types) AND "+
             "s_time <= :allDayStart AND e_time >= :allDayEnd "+
-            ") ORDER BY " + ALL_DAY + ", " + START_TIME + " ASC")
+            ") ORDER BY " + ALL_DAY + ", " + END_TIME + ", " + START_TIME)
     Flowable<List<Event>> findByDayAndTypeAllDay(String day, List<String> types,
                                                           String allDayStart,
                                                           String allDayEnd);
 
 
-    @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + START_TIME + " BETWEEN :startDate AND :endDate AND " + ALL_DAY + " = 0  ORDER BY " + START_TIME)
+    @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + START_TIME + " BETWEEN :startDate AND :endDate AND " + ALL_DAY + " = 0  ORDER BY " + END_TIME + ", " + START_TIME)
     Flowable<List<Event>> findInDateRange(String startDate, String endDate);
 
     @Query("SELECT * FROM " + TABLE_NAME + " WHERE (" + LATITUDE + " BETWEEN :minLat AND :maxLat) AND (" + LONGITUDE + " BETWEEN :minLon AND :maxLon)")
