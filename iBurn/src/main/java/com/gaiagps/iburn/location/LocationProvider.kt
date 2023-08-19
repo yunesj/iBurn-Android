@@ -50,6 +50,7 @@ object LocationProvider {
         return getLastLocationFlow(context).asObservable()
     }
 
+    @SuppressLint("MissingPermission")
     fun getLastLocationFlow(context: Context): Flow<Location> {
         init(context)
         return if (BuildConfig.MOCK) {
@@ -74,6 +75,7 @@ object LocationProvider {
         return currentLocationFlow(context, request).asObservable()
     }
 
+    @SuppressLint("MissingPermission")
     private fun currentLocationFlow(context: Context, request: LocationRequest): Flow<Location> {
         init(context)
         return if (BuildConfig.MOCK) {

@@ -197,9 +197,9 @@ class DataProvider private constructor(private val context: Context, private val
     }
 
     fun observeEventFavorites(): Flowable<List<Event>> {
-
-        // TODO : Honor upgradeLock?
-        return db.eventDao().favorites
+        val nowDate = CurrentDateProvider.getCurrentDate()
+        val now = Utils.convertDateToString(nowDate)
+        return db.eventDao().getFavorites(now)
     }
 
     fun observeEventBetweenDates(start: Date, end: Date): Flowable<List<Event>> {
@@ -244,13 +244,14 @@ class DataProvider private constructor(private val context: Context, private val
      * since we always want to show this data for an event.
      */
     fun observeFavorites(): Flowable<SectionedPlayaItems> {
+        val nowDate = CurrentDateProvider.getCurrentDate()
+        val now = Utils.convertDateToString(nowDate)
 
-        // TODO : Honor upgradeLock
         // TODO : Return structure with metadata on how many art, camps, events etc?
         return Flowables.combineLatest(
                 db.artDao().favorites,
                 db.campDao().favorites,
-                db.eventDao().favorites)
+                db.eventDao().getFavorites(now))
         { arts, camps, events ->
 
             val sections = ArrayList<IntRange>(3)

@@ -35,8 +35,8 @@ public interface EventDao {
     @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + PLAYA_ID + " = :id")
     Single<Event> getByPlayaId(String id);
 
-    @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + FAVORITE + " = 1 ORDER BY " + END_TIME + ", " + START_TIME)
-    Flowable<List<Event>> getFavorites();
+    @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + FAVORITE + " = 1 AND " + END_TIME + " >= :now ORDER BY " + END_TIME + ", " + START_TIME)
+    Flowable<List<Event>> getFavorites(String now);
 
     @Query("SELECT * FROM " + TABLE_NAME + " WHERE " + FAVORITE + " = 1 AND " + END_TIME + " >= :now AND " + START_TIME + " >= :startingFrom AND " + START_TIME + " <= :startingUntil ORDER BY " + END_TIME + ", " + START_TIME)
     Flowable<List<Event>> getNonExpiredFavoritesStartingBetween(String now, String startingFrom, String startingUntil);

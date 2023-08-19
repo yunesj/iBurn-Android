@@ -6,11 +6,10 @@ SECRETS.java
 SECRETS.kt
 
 #Embargo Data
-iBurn/src/main/assets/databases/
-iBurn/src/main/assets/json/
+iBurn/src/main/assets/json
+iBurn/src/main/assets/databases
 .DS_Store
 *.class
-data/
 
 #Bundled media
 iBurn/src/main/assets/audio_tour/
