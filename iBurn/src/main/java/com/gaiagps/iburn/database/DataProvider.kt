@@ -197,8 +197,9 @@ class DataProvider private constructor(private val context: Context, private val
     }
 
     fun observeEventFavorites(): Flowable<List<Event>> {
+        val isoDateFormat = DateUtil.getIso8601Format()
         val nowDate = CurrentDateProvider.getCurrentDate()
-        val now = Utils.convertDateToString(nowDate)
+        val now = isoDateFormat.format(nowDate)
         return db.eventDao().getFavorites(now)
     }
 
@@ -245,7 +246,7 @@ class DataProvider private constructor(private val context: Context, private val
      */
     fun observeFavorites(): Flowable<SectionedPlayaItems> {
         val nowDate = CurrentDateProvider.getCurrentDate()
-        val now = Utils.convertDateToString(nowDate)
+        val now = DateUtil.getIso8601Format().format(nowDate)
 
         // TODO : Return structure with metadata on how many art, camps, events etc?
         return Flowables.combineLatest(
@@ -392,9 +393,9 @@ class DataProvider private constructor(private val context: Context, private val
             startingUntil.set(Calendar.HOUR_OF_DAY, 8)
         }
 
-        val now = Utils.convertDateToString(nowDate)
-        val startingFromString = Utils.convertDateToString(startingFrom.getTime())
-        val startingUntilString = Utils.convertDateToString(startingUntil.getTime())
+        val now = DateUtil.getIso8601Format().format(nowDate)
+        val startingFromString = DateUtil.getIso8601Format().format(startingFrom.getTime())
+        val startingUntilString = DateUtil.getIso8601Format().format(startingUntil.getTime())
 
 
         return Flowables.combineLatest(
